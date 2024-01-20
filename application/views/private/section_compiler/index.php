@@ -114,11 +114,17 @@
 
 <h5>To reorder sections, simply drag & drop the section to its new place. All section numbers will be updated for you.</h5>
 
+<?php if ($admin_mc):?>
+<div style="position:relative;">
+	<h4 id="delete_sections_toggle" class="btn" style="position:absolute; bottom:0; right:0;" rel="tooltip" data-original-title="Show 'Remove section' buttons" data-placement="left">X</h4>
+</div>
+<?php endif ?>
+
 <table id="m_sections_table" class="table table-striped table-bordered table-hover table-condensed" >
 	<thead>
 		<tr><th class="section_number_header">Section</th><th>Meta</th><th>Title</th><th>Reader</th><th>Notes</th><th>Listen URL</th><th>Link</th><th>Status</th>
 			<?php if ($admin_mc):?>
-			<th></th>
+			<th class="delete_column"></th>
 			<?php endif; ?>
 		</tr>
 	</thead>
@@ -167,7 +173,7 @@
 				<td id="status-<?= $section->id ?>" class="edit_status"><?= $section->status ?></td>
 
 				<?php if ($admin_mc):?>
-				<td><i data-section_id="<?= $section->id ?>" data-placement="left" rel="tooltip" class="icon-remove delete_section" data-original-title="Remove Section"></i></td>
+					<td class="delete_column"><i data-section_id="<?= $section->id ?>" data-placement="left" rel="tooltip" class="icon-remove delete_section" data-original-title="Remove Section"></i></td>
 				<?php endif ?>
 
 			</tr>

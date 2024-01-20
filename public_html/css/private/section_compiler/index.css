@@ -10,3 +10,7 @@
 .section_number_header{
 	background : none !important;
 }
+
+.delete_column{
+	display:none;
+}

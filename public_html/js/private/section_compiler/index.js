@@ -2,6 +2,7 @@ $(document).ready(function() {
 
 	$('.icon-remove').tooltip();
 	$('.icon-search').tooltip();
+	$('#delete_sections_toggle').tooltip();
 
 	bind_edit();
 
@@ -173,6 +174,11 @@ $(document).ready(function() {
 	    
 		});
 
+	});
+
+
+	$('#delete_sections_toggle').live('click', function(){
+		$('.delete_column').toggle();
 	});
 
 	$('.delete_section').live('click', function(){
