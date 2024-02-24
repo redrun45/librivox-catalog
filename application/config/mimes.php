@@ -137,6 +137,7 @@ return array(
 	'3gp'   =>	array('video/3gp', 'video/3gpp'),
 	'mp4'   =>	'video/mp4',
 	'm4a'   =>	'audio/x-m4a',
+	'm4b'	=>	array('audio/m4b', 'audio/x-m4b', 'audio/x-m4a'),
 	'f4v'   =>	array('video/mp4', 'video/x-f4v'),
 	'flv'	=>	'video/x-flv',
 	'webm'	=>	'video/webm',

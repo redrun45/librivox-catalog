@@ -127,7 +127,7 @@ class Uploader extends Public_Controller
 
 			//Your upload directory, see CI user guide
 			$config['upload_path'] = $this->getPath_img_upload_folder() . $mc;
-			$config['allowed_types'] = 'jpg|mp3|wav|txt|flac|zip';  //.mp3, .wav, .txt, .flac and .zip
+			$config['allowed_types'] = 'jpg|mp3|wav|txt|flac|m4b|zip';  //.mp3, .wav, .txt, .flac, .m4b and .zip
 			$config['max_size'] = '300000000';
 			$config['file_name'] = $name;
 
