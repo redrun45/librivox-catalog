@@ -175,25 +175,45 @@ $(document).ready(function() {
 
 	});
 
+
+	var intentional_deletions = 0;
+
 	$('.delete_section').live('click', function(){
 
 		var btn = $(this);
 		var section_id 	= btn.attr('data-section_id');
 
-		$.ajax({
-	        url: CI_ROOT + "private/section_compiler/delete_section",
-	        type: 'post',
-	        data: {'section_id': section_id},
-	        complete: function(r){
-	        	var deleted_row = btn.closest('tr').get(0);
+		function _delete_row(confirmed)
+		{
+			if (confirmed) {
+				$.ajax({
+						url: CI_ROOT + "private/section_compiler/delete_section",
+					type: 'post',
+					data: {'section_id': section_id},
+					complete: function(r){
+						var deleted_row = btn.closest('tr').get(0);
 
-	  			oTable.fnDeleteRow(
-					oTable.fnGetPosition(
-						deleted_row
-					)
-				);	
-	        }	
-	    });
+						oTable.fnDeleteRow(
+							oTable.fnGetPosition(
+								deleted_row
+							)
+						);
+					}
+				});
+				intentional_deletions += 1;
+			}
+		}
+
+		if (intentional_deletions < 1) {
+
+			// TODO: Maybe show the user a more specific prompt - `btn.closest('tr').attr('section_number')` ?
+			jConfirm('Do you want to delete this section?<br>After deleting one section, you will no longer be prompted.',
+				'Confirmation Dialog', _delete_row);
+		}
+		else
+		{
+			_delete_row(true);
+		}
 
 	});
 
