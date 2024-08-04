@@ -2,18 +2,122 @@
 
 class Author_model extends MY_Model
 {
-	public function autocomplete($term, $search_field)
+	public function autocomplete($term, $search_field, $filter_term, $filter_field)
 	{
-		$fields = array('id', 'first_name', 'last_name', 'dob', 'dod', 'author_url');
 
-		if (!in_array($search_field, $fields))
+		if (!preg_match("/[\w]/", $term))
 			return array();
 
-		$query = $this->db->select($fields)
-			->where(array('linked_to'=>'0'))
-			->order_by($search_field)
-			->like($search_field, $term)
-			->get($this->_table, AUTOCOMPLETE_LIMIT);
+		$name_clause = '';
+		$bindings = array();
+		$sort_order = 'last_name';
+
+		switch ($search_field)
+		{
+			default:
+				return array();
+
+			case 'first_name':
+				$name_parts = preg_split('/ /', $term, 2, PREG_SPLIT_NO_EMPTY); // Split by first space
+
+				// Search first word as first name
+				$name_clause .= '
+						AND (match_table.first_name LIKE ?
+							OR (match_table.first_name = "" AND match_table.last_name LIKE ?) )';
+				$bindings =  array_merge($bindings, array('%'. $name_parts[0] .'%', '%'. $name_parts[0] .'%'));
+
+				if (!empty($name_parts[1]))
+				{
+					// If there's a second word, refine the search.  Match the entire term against the full name.
+					$name_clause .= '
+						AND CONCAT(match_table.first_name, " ", match_table.last_name) LIKE ?';
+					$bindings =  array_merge($bindings, array('%'. $term .'%'));
+				}
+				else
+				{
+					$search_order = 'first_name';
+				}
+				break;
+
+			case 'last_name':
+				$name_parts = preg_split('/, ?/', $term, 2, PREG_SPLIT_NO_EMPTY); // Split by first comma
+
+				// Search before the comma as last name
+				$name_clause .= '
+						AND match_table.last_name LIKE ?';
+				$bindings =  array_merge($bindings, array('%'. $name_parts[0] .'%'));
+
+				if (!empty($name_parts[1]))
+				{
+					// If there's anything following a comma, refine by searching that as the first name.
+					$name_clause .= '
+						AND (match_table.first_name LIKE ?
+							OR (match_table.first_name = "" AND match_table.last_name LIKE ?) )';
+					$bindings =  array_merge($bindings, array('%'. $name_parts[1] .'%', '%'. $name_parts[1] .'%'));
+
+					$sort_order = 'first_name';
+				}
+				break;
+
+			case 'full_name':
+				$name_parts = preg_split('/, ?/', $term, 2, PREG_SPLIT_NO_EMPTY); // Split by first comma
+
+				if (empty($name_parts[1]))
+				{
+					// No comma: assume we're searching anywhere within a full name (might be slower than other search modes, since nothing narrows our selection first)
+					$name_clause .= '
+						AND CONCAT(match_table.first_name, " ", match_table.last_name) LIKE ?';
+					$bindings =  array_merge($bindings, array('%'. $name_parts[0] .'%'));
+				}
+				else
+				{
+					// With text following a comma: assume we're searching "Lastname, Firstname"
+					$name_clause .= '
+						AND match_table.last_name LIKE ?
+						AND (match_table.first_name LIKE ?
+							OR (match_table.first_name = "" AND match_table.last_name LIKE ?) )';
+					$bindings =  array_merge($bindings, array('%'. $name_parts[0] .'%', '%'. $name_parts[1] .'%', '%'. $name_parts[1] .'%'));
+
+					$sort_order = 'first_name';
+				}
+				break;
+		}
+
+
+		// An additional option, which we have on the Template Generator but not Section Compiler, is filtering the results of one box by what's in the other.
+		switch ($filter_field)
+		{
+			case 'first_name':
+				$name_clause .= '
+					AND (match_table.first_name LIKE ?
+						OR (match_table.first_name = "" AND match_table.last_name LIKE ?) )';
+				$bindings =  array_merge($bindings, array('%'. $filter_term .'%', '%'. $filter_term .'%'));
+				break;
+
+			case 'last_name':
+				$name_clause .= '
+						AND match_table.last_name LIKE ?';
+				$bindings =  array_merge($bindings, array('%'. $filter_term .'%'));
+				break;
+		}
+
+		// Since we use the name-matching clause once for authors and once for pseudonyms, we need the bindings for it twice.
+		$bindings = array_merge($bindings, $bindings);
+
+		$sql = 'SELECT id, first_name, last_name, dob, dod, author_url, NULL AS pseudo_first, NULL AS pseudo_last
+			FROM authors match_table
+			WHERE linked_to = 0
+			'. $name_clause .'
+			UNION
+			SELECT a.id, a.first_name, a.last_name, dob, dod, author_url, match_table.first_name AS pseudo_first, match_table.last_name AS pseudo_last
+			FROM author_pseudonyms match_table
+			JOIN authors a ON (a.id = match_table.author_id)
+			WHERE linked_to = 0
+			'. $name_clause .'
+			ORDER BY '. $sort_order .'
+			LIMIT '. AUTOCOMPLETE_LIMIT;
+
+		$query = $this->db->query($sql, $bindings);
 		return $query->result();
 	}
 
