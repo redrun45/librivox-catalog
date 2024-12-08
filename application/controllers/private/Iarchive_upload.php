@@ -51,6 +51,7 @@ class Iarchive_upload extends Private_Controller
 		$description = $this->_get_full_description($params, $project);
 		$params['description'] = _normalize_and_deduplicate_newlines_in_html($description);  //Standardizes whitespace, replacing newlines with <br /> tags
 		$params['language'] = $this->data['language_code'];
+		$params['totaltime'] = $this->_get_total_runtime($project);
 
 		// Close db connection before uploading to avoid hogging connections
 		$this->db->close();
@@ -73,6 +74,7 @@ class Iarchive_upload extends Private_Controller
 		//update the project
 		$update['url_iarchive'] = $config['iarchive_project_page'] . '/' . $params['project_slug'];
 		$update['zip_url'] = 'https://www.archive.org/download/' . $params['project_slug'] . '/' . $params['project_slug'] . '_64kb_mp3.zip';
+		$update['totaltime'] = $params['totaltime'];
 
 		$this->project_model->update($project->id, $update);
 
@@ -83,8 +85,6 @@ class Iarchive_upload extends Private_Controller
 		$this->_update_section_urls($project, $params);
 
 		$this->_update_section_sizes($project);
-
-		$this->_update_total_runtime($project);
 
 		$this->_update_total_zipsize($project);
 
@@ -147,7 +147,7 @@ class Iarchive_upload extends Private_Controller
 		return $this->section_model->update_section_sizes($project->id);
 	}
 
-	function _update_total_runtime($project)
+	function _get_total_runtime($project)
 	{
 		$this->load->helper('previewer');
 		$this->load->model('section_model');
@@ -155,10 +155,7 @@ class Iarchive_upload extends Private_Controller
 
 		if (empty($runtime)) $runtime = 0;
 
-		$totaltime = format_playtime($runtime);
-
-		$this->load->model('project_model');
-		$this->project_model->update($project->id, array('totaltime' => $totaltime));
+		return format_playtime($runtime);
 	}
 
 	function _update_total_zipsize($project)

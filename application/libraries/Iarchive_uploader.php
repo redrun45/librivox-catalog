@@ -70,6 +70,7 @@ class Iarchive_uploader
 		$headers[] = 'x-archive-meta-subject:'.$params['subject'];
 		$headers[] = 'x-archive-meta-licenseurl:'.$params['licenseurl'];
 		$headers[] = 'x-archive-meta-call--number:'.$params['project_id'];
+		$headers[] = 'x-archive-meta-runtime:'.$params['totaltime'];
 
 	    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
