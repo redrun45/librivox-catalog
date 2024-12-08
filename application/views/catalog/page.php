@@ -3,10 +3,6 @@
 
 <div class="main-content">
 	
-	
-	<?= $book_sidebar;  ?>
-	
-	
 	<div class="page book-page">
 
 			<div class="content-wrap clearfix">
@@ -83,7 +79,10 @@
 				</table>
 	
 
-</div><!-- end .page -->
+	</div><!-- end .page -->
+
+	<?= $book_sidebar;  ?>
+
 </div><!-- end .main-content -->
 
 <?= $footer;  ?>
