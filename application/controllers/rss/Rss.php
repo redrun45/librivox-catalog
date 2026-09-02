@@ -10,7 +10,8 @@ class Rss extends Catalog_controller
 
 	public function index($slug)
 	{
-		// eventually add a caching solution here
+		// Allow caching by any server including proxies like Cloudflare ('public'), for 1 day (86400 seconds).
+		header('Cache-Control: public, max-age=86400');
 
 		//get project data
 		if (empty($slug))
