@@ -36,14 +36,10 @@ class Feed extends REST_Controller
 
 		//var_dump($audiobooks);return;
 
-		if ($audiobooks)
-		{
-			$this->response($audiobooks, 200); // 200 being the HTTP response code
-		}
-		else
-		{
-			$this->response(array('error' => 'Audiobooks could not be found'), 404);
-		}
+		$status_code = isset($audiobooks['error_code']) ? $audiobooks['error_code'] : 200; // 200 "OK"
+		unset($audiobooks['error_code']);
+
+		$this->response($audiobooks, $status_code);
 	}
 
 	public function audiotracks_get()

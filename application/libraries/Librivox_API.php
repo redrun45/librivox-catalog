@@ -18,19 +18,6 @@ class Librivox_API{
 		return get_instance()->$var;
 	}
 
-	public function get_audiobooks($params)
-	{
-
-		//temp data
-
-		//notes - format function will make "authors" => "author"
-
-		$array =  $this->_build_data_set($params);  //array('book'=>$this->project_model->get_by('id',5055));
-
-		return $array;
-
-	}
-
 	public function get_audiotracks($params)
 	{
 		if (!empty($params['id'])) $array['sections'] =  $this->_get_section($params['id']);
@@ -51,7 +38,7 @@ class Librivox_API{
 
 	}
 
-	function _build_data_set($params)
+	public function get_audiobooks($params)
 	{
 		/*
 		$params['offset'] 	= $this->get('offset'); -- checked
@@ -81,7 +68,10 @@ class Librivox_API{
 		// to crash, and we don't want to silently give fewer than requested.
 		if ($params['limit'] > 2000)
 		{
-			return ['error' => 'Too many records requested.  See https://librivox.org/api/info for details.'];
+			return array(
+				'error' => 'Too many records requested.  See https://librivox.org/api/info for details.',
+				'error_code' => 400 // "Bad request".  We might also consider 413 "Content Too Large"
+			);
 		}
 
         // TODO(artom/warren-bank) For now we can only sort by id because
@@ -146,7 +136,10 @@ class Librivox_API{
 			->get('projects p')
 			->result_array();
 
-		if (empty($result)) return false;
+		if (empty($result)) return array(
+			'error' => 'Audiobooks could not be found',
+			 'error_code' => 404 // "Not Found"
+		);
 
 		foreach ($result as $key => $row) {
 			$project['id'] 				= $row['id'];
