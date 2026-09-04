@@ -24,7 +24,7 @@
 
 </p>
 
-<p>Note that the title, author & genre may be searched on with ^ as before, to anchor the beginign of the search term.</p>
+<p>Note that the title, author & genre may be searched on with ^ as before, to anchor the beginning of the search term.</p>
 
 <p>Example: <a href="<?= base_url()?>api/feed/audiobooks/title/^all"><?= base_url()?>api/feed/audiobooks/title/^all</a></p>
 
@@ -37,6 +37,10 @@
 	</ul>
 
 </p>
+
+<p>The maximum for the 'limit' is 2,000.  Clients sending a higher limit will receive an error object, rather than silently receiving an incomplete set of results.</p>
+
+<br>
 
 <p>Search may be conducted as:</p>
 

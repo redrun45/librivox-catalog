@@ -77,6 +77,13 @@ class Librivox_API{
 		$limit = (!empty($params['limit'])) ? $params['limit'] : 50;
 		$offset = (!empty($params['offset'])) ? $params['offset'] : 0;
 
+		// Error when the client asks for too many results at once - we don't want
+		// to crash, and we don't want to silently give fewer than requested.
+		if ($params['limit'] > 2000)
+		{
+			return ['error' => 'Too many records requested.  See https://librivox.org/api/info for details.'];
+		}
+
         // TODO(artom/warren-bank) For now we can only sort by id because
         // that's what the initial use case is, and because that's the only
         // field where we have an index. Other fields can be added later, but
